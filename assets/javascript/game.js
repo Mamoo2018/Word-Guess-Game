@@ -1,165 +1,142 @@
-window.onload = function () {
+var sportTeams = ["giants", "patriots", "rams", "raiders", "jets", "chargers", "eagles", "browns", "bears", "saints"]
 
-    var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-          'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
-          't', 'u', 'v', 'w', 'x', 'y', 'z'];
-    
-    var categories;         // Array of topics
-    var chosenCategory;     // Selected catagory
-    var getHint ;          // Word getHint
-    var word ;              // Selected word
-    var guess ;             // Geuss
-    var geusses = [ ];      // Stored geusses
-    var lives ;             // Lives
-    var counter ;           // Count correct geusses
-    var space;              // Number of spaces in word '-'
-  
-    // Get elements
-    var showLives = document.getElementById("mylives");
-    var showCatagory = document.getElementById("scatagory");
-    var getHint = document.getElementById("hint");
-    var showClue = document.getElementById("clue");
-  
-  
-  
-    // create alphabet ul
-    var buttons = function () {
-      myButtons = document.getElementById('buttons');
-      letters = document.createElement('ul');
-  
-      for (var i = 0; i < alphabet.length; i++) {
-        letters.id = 'alphabet';
-        list = document.createElement('li');
-        list.id = 'letter';
-        list.innerHTML = alphabet[i];
-        check();
-        myButtons.appendChild(letters);
-        letters.appendChild(list);
-      }
-    }
-      
-    
-      // Select different catagories
+//Empty variables to store values later
+var randomWord = "";
+var letters = []
+var blanks = 0;
+var blanksAndCorrect = [];
+var wrongGuess = [];
 
-      var selectCat = function () {
-        if (chosenCategory === categories[0]) {
-          catagoryName.innerHTML = "NFL Teams";
-        } else if (chosenCategory === categories[1]) {
-          catagoryName.innerHTML = "NBA Teams";
-        } else if (chosenCategory === categories[2]) {
-          catagoryName.innerHTML = "MLB Teams";
-        }
-      }
-  
-    // Create geusses ul
-     result = function () {
-      wordHolder = document.getElementById('hold');
-      correct = document.createElement('ul');
-  
-      for (var i = 0; i < word.length; i++) {
-        correct.setAttribute('id', 'my-word');
-        guess = document.createElement('li');
-        guess.setAttribute('class', 'guess');
-        if (word[i] === "-") {
-          guess.innerHTML = "-";
-          space = 1;
-        } else {
-          guess.innerHTML = "_";
-        }
-  
-        geusses.push(guess);
-        wordHolder.appendChild(correct);
-        correct.appendChild(guess);
-      }
+//Counter Variables
+var wins = 0;
+var losses = 0;
+var guessesRemaining = 9;
+
+
+
+// ALL FUNCTIONS
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+//__________________________________________________________
+//GAME START FUNCTION
+//__________________________________________________________
+function Game() {
+    //computer generates random word from words array
+    randomWord = sportTeams[Math.floor(Math.random() * sportTeams.length)];
+
+    // split the individual word into separate arrays, and store in new array 
+    letters = randomWord.split("");
+
+    //store length of word in blanks, for later use
+    blanks = letters.length;
+
+    //creating a loop to generate "_" for each letter in array stored in blanks
+    for (var i = 0; i < blanks; i++) {
+        blanksAndCorrect.push("_");
     }
-    
-    // Show lives
-     comments = function () {
-      showLives.innerHTML = "You have " + lives + " lives";
-      if (lives < 1) {
-        showLives.innerHTML = "Game Over";
-      }
-      for (var i = 0; i < geusses.length; i++) {
-        if (counter + space === geusses.length) {
-          showLives.innerHTML = "You Win!";
+
+    //showing the "_" within HTML
+    document.getElementById("currentword").innerHTML = "  " + blanksAndCorrect.join("  ");
+
+    //console logging 
+    console.log(randomWord);
+    console.log(letters)
+    console.log(blanks)
+    console.log(blanksAndCorrect)
+}
+
+
+//__________________________________________________________
+//RESET FUNCTION
+//__________________________________________________________
+function reset() {
+    guessesRemaining = 9;
+    wrongGuess = [];
+    blanksAndCorrect = [];
+    Game()
+}
+
+//__________________________________________________________
+//CHECK LETTERS/COMPARE FUNCTION
+//__________________________________________________________
+
+//If/Else, to see if letter selected matches random word
+function checkLetters(letter) {
+    var letterInWord = false;
+    //if the generated randomword is equal to the letter entered... then variable is true
+    for (var i = 0; i < blanks; i++) {
+        if (randomWord[i] === letter) {
+            letterInWord = true;
         }
-      }
     }
-  
-         // OnClick Function
-     check = function () {
-      list.onclick = function () {
-        var geuss = (this.innerHTML);
-        this.setAttribute("class", "active");
-        this.onclick = null;
-        for (var i = 0; i < word.length; i++) {
-          if (word[i] === geuss) {
-            geusses[i].innerHTML = geuss;
-            counter += 1;
-          } 
+    //if letterInWord (false)
+    if (letterInWord) {
+        //check each letter to see if it matches word
+        for (var i = 0; i < blanks; i++) {
+            if (randomWord[i] === letter) {
+                blanksAndCorrect[i] = letter;
+            }
         }
-        var j = (word.indexOf(geuss));
-        if (j === -1) {
-          lives -= 1;
-          comments();
-        } else {
-          comments();
-        }
-      }
     }
-    
-      
-    // Play
-    play = function () {
-      categories = [
-          ["eagles", "patriots", "saints", "falcons", "panthers", "packers", "giants"],
-          ["raptors", "celtics", "warriors", "jazz", "pelicans"],
-          ["bluejays", "yankees", "astros", "tigers", "brewers"]
-      ];
-  
-      chosenCategory = categories[Math.floor(Math.random() * categories.length)];
-      word = chosenCategory[Math.floor(Math.random() * chosenCategory.length)];
-      word = word.replace(/\s/g, "-");
-      console.log(word);
-      buttons();
-  
-      geusses = [ ];
-      lives = 10;
-      counter = 0;
-      space = 0;
-      result();
-      comments();
-      selectCat();
-      canvas();
+    //otherwise, push the incorrect guess in the wrong guesses section, and reduce remaining guesses
+    else {
+        wrongGuess.push(letter);
+        guessesRemaining--;
     }
-  
-    play();
-    
-    // Hint
-  
-      hint.onclick = function() {
-  
-        hints = [
-          ["Based in Mersyside", "Based in Mersyside", "First Welsh team to reach the Premier Leauge", "Owned by A russian Billionaire", "Once managed by Phil Brown", "2013 FA Cup runners up", "Gazza's first club"],
-          ["Science-Fiction horror film", "1971 American action film", "Historical drama", "Anamated Fish", "Giant great white shark"],
-          ["Northern city in the UK", "Home of AC and Inter", "Spanish capital", "Netherlands capital", "Czech Republic capital"]
-      ];
-  
-      var catagoryIndex = categories.indexOf(chosenCategory);
-      var hintIndex = chosenCategory.indexOf(word);
-      showClue.innerHTML = "Clue: - " +  hints [catagoryIndex][hintIndex];
-    };
-  
-     // Reset
-  
-    document.getElementById('reset').onclick = function() {
-      correct.parentNode.removeChild(correct);
-      letters.parentNode.removeChild(letters);
-      showClue.innerHTML = "";
-      context.clearRect(0, 0, 400, 400);
-      play();
+    console.log(blanksAndCorrect);
+}
+
+//__________________________________________________________
+//FINAL COMPLETE FUNCTION
+//__________________________________________________________
+
+//check to see if player won...
+function complete() {
+    console.log("wins:" + wins + "| losses:" + losses + "| guesses left:" + guessesRemaining)
+
+    //if WON...then alert and reset new round
+    if (letters.toString() === blanksAndCorrect.toString()) {
+        wins++;
+        reset()
+        //display wins on screen
+        document.getElementById("wins").innerHTML = " " + wins;
+
+        //if LOST...then alert and reset new round
+    } else if (guessesRemaining === 0) {
+        losses++;
+        reset()
+        document.getElementById("losses").innerHTML = " " + losses;
     }
-  }
-  
-  
-  
+    //display losses on screen && guesses remaining countdown
+    document.getElementById("currentword").innerHTML = "  " + blanksAndCorrect.join(" ");
+    document.getElementById("guessesremaining").innerHTML = " " + guessesRemaining;
+}
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//_____________________________________________________
+// EXECUTE CODE 
+//_____________________________________________________
+
+//call start game function
+Game()
+
+//check for keyup, and convert to lowercase then store in guesses
+document.onkeyup = function (event) {
+    var guesses = String.fromCharCode(event.keyCode).toLowerCase();
+    //check to see if guess entered matches value of random word
+    checkLetters(guesses);
+    //process wins/loss 
+    complete();
+    //store player guess in console for reference 
+    console.log(guesses);
+
+    //display/store incorrect letters on screen
+    document.getElementById("wrongGuesses").innerHTML = "  " + wrongGuess.join(" ");
+}
+function getHint()
+{
+var random = randomWord[Math.floor(Math.random() * randomWord.length)];
+document.getElementById("message").innerHTML=random;
+}; 
